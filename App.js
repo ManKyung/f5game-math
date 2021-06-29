@@ -1,21 +1,71 @@
-import { StatusBar } from 'expo-status-bar';
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useEffect } from "react";
+import * as eva from "@eva-design/eva";
+import { ApplicationProvider, IconRegistry } from "@ui-kitten/components";
+import { default as theme } from "./theme.json";
+import { NavigationContainer } from "@react-navigation/native";
+import { createStackNavigator } from "@react-navigation/stack";
+import { Home, Play } from "./components";
+import { EvaIconsPack } from "@ui-kitten/eva-icons";
+import * as Analytics from "expo-firebase-analytics";
+import uuid from "react-native-uuid";
 
-export default function App() {
+const Stack = createStackNavigator();
+
+export default () => {
+  const uid = uuid.v4();
+  Analytics.setClientId(uid);
+  useEffect(() => {
+    (async () => {
+      await Analytics.logEvent("app_view", {
+        name: "app_start",
+        screen: "APP",
+        user: uid,
+        purpose: "APP_START",
+      });
+    })();
+  });
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
-  );
-}
+    <>
+      <IconRegistry icons={EvaIconsPack} />
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+      <ApplicationProvider {...eva} theme={{ ...eva.dark, ...theme }}>
+        <NavigationContainer>
+          <Stack.Navigator>
+            {/* <Stack.Screen
+              name="Home"
+              component={Home}
+              options={{
+                headerShown: false,
+              }}
+            /> */}
+            <Stack.Screen
+              name="Play"
+              component={Play}
+              options={{
+                headerShown: false,
+              }}
+              // initialParams={{ stage: "easy" }}
+              // initialParams={{ stage: "medium" }}
+              initialParams={{ stage: "easy" }}
+            />
+            {/* <Stack.Screen
+              name="Play"
+              component={Play}
+              options={{
+                headerShown: false,
+              }}
+              initialParams={{ items, stage: 1 }}
+            />
+            <Stack.Screen
+              name="Dictionary"
+              component={Dictionary}
+              options={{
+                headerShown: false,
+              }}
+            /> */}
+          </Stack.Navigator>
+        </NavigationContainer>
+      </ApplicationProvider>
+    </>
+  );
+};
