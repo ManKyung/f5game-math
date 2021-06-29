@@ -92,7 +92,7 @@ const isAnswerHardAndCrazy = (items) => {
       items[3][2].value,
       items[4][2].value
     );
-  items[4][5].isCorrect =
+  items[5][4].isCorrect =
     items[5][4].value ===
     numberCalc(
       items[0][4].value,

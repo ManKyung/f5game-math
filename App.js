@@ -4,7 +4,7 @@ import { ApplicationProvider, IconRegistry } from "@ui-kitten/components";
 import { default as theme } from "./theme.json";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
-import { Home, Play } from "./components";
+import { Home, Stage, Play } from "./components";
 import { EvaIconsPack } from "@ui-kitten/eva-icons";
 import * as Analytics from "expo-firebase-analytics";
 import uuid from "react-native-uuid";
@@ -39,6 +39,13 @@ export default () => {
               }}
             /> */}
             <Stack.Screen
+              name="Stage"
+              component={Stage}
+              options={{
+                headerShown: false,
+              }}
+            />
+            <Stack.Screen
               name="Play"
               component={Play}
               options={{
@@ -46,7 +53,7 @@ export default () => {
               }}
               // initialParams={{ stage: "easy" }}
               // initialParams={{ stage: "medium" }}
-              initialParams={{ stage: "easy" }}
+              initialParams={{ level: "easy" }}
             />
             {/* <Stack.Screen
               name="Play"

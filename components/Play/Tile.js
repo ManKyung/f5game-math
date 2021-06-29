@@ -4,6 +4,7 @@ import { View, Text, StyleSheet, Dimensions } from "react-native";
 import { observer } from "mobx-react";
 import { isClear } from "../../lib";
 import useStore from "../../stores";
+import { GameClearModal } from "./GameClearModal";
 
 const screen = Dimensions.get("screen");
 const containerPadding = 4;
@@ -26,31 +27,40 @@ const InnerTile = styled.TouchableOpacity`
   border-radius: 8px;
 `;
 
-const Tile = observer(({ data, stage }) => {
-  const { game } = useStore();
-
+const Tile = observer(({ navigation, data, level, number }) => {
+  const { game, stage } = useStore();
   const [items, setData] = useState(data);
+  const [isGameClearModal, setIsGameClearModal] = useState(false);
 
   const mapLen = items[0].length;
   const column = mapLen === 4 ? 4 : 6;
   const tileWidth = mapLen === 4 ? "25%" : "16%";
   const tileHeight =
     (screen.width - containerPadding * 2 - tilePadding * 2) / column;
+
+  // useEffect(() => {
+  //   setTimeout(() => {
+  //     setIsGameClearModal(true);
+  //     stage.setScore(level, number);
+  //   }, 2000);
+  // }, []);
   const doClick = useCallback((item, row, col) => {
     if (!game.selectedNumber || item.type !== "number") {
       return;
     }
     let t = [...items];
     let tt = { ...t[row][col] };
-    tt.value = game.selectedNumber;
+    tt.value = game.selectedNumber === -1 ? "" : game.selectedNumber;
     t[row][col] = tt;
-    const d = game.isAnswer(t, stage);
+    const d = game.isAnswer(t, level);
     setData(d);
     if (isClear(d)) {
-      console.log("clear");
+      setTimeout(() => {
+        setIsGameClearModal(true);
+        stage.setScore(level, number);
+      }, 700);
     }
   }, []);
-  // console.log(game.selectedNumber);
   return (
     <>
       {items.map((rows, row) => {
@@ -90,6 +100,12 @@ const Tile = observer(({ data, stage }) => {
           });
         }
       })}
+      {isGameClearModal ? (
+        <GameClearModal
+          setIsGameClearModal={setIsGameClearModal}
+          navigation={navigation}
+        />
+      ) : null}
     </>
   );
 });
