@@ -31,13 +31,13 @@ export default () => {
       <ApplicationProvider {...eva} theme={{ ...eva.dark, ...theme }}>
         <NavigationContainer>
           <Stack.Navigator>
-            {/* <Stack.Screen
+            <Stack.Screen
               name="Home"
               component={Home}
               options={{
                 headerShown: false,
               }}
-            /> */}
+            />
             <Stack.Screen
               name="Stage"
               component={Stage}
@@ -51,25 +51,8 @@ export default () => {
               options={{
                 headerShown: false,
               }}
-              // initialParams={{ stage: "easy" }}
-              // initialParams={{ stage: "medium" }}
               initialParams={{ level: "easy" }}
             />
-            {/* <Stack.Screen
-              name="Play"
-              component={Play}
-              options={{
-                headerShown: false,
-              }}
-              initialParams={{ items, stage: 1 }}
-            />
-            <Stack.Screen
-              name="Dictionary"
-              component={Dictionary}
-              options={{
-                headerShown: false,
-              }}
-            /> */}
           </Stack.Navigator>
         </NavigationContainer>
       </ApplicationProvider>

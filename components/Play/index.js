@@ -1,9 +1,9 @@
 import React from "react";
-import { Layout } from "@ui-kitten/components";
 import styled from "styled-components/native";
-import { StyleSheet } from "react-native";
+import { Layout } from "@ui-kitten/components";
+import { StyleSheet, View } from "react-native";
 import { StatusBar } from "expo-status-bar";
-import { setInitGame } from "../../lib";
+import { setInitGame, Banner } from "../../lib";
 import Tile from "./Tile";
 import Number from "./Number";
 
@@ -30,6 +30,7 @@ export const Play = ({ navigation, route }) => {
         />
         <Number numbers={maps.count} />
       </Container>
+      <Banner />
     </Layout>
   );
 };
@@ -47,5 +48,10 @@ const styles = StyleSheet.create({
   },
   text: {
     fontSize: 24,
+  },
+  view: {
+    flex: 1,
+    flexDirection: "row",
+    paddingVertical: 10,
   },
 });
