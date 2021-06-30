@@ -1,7 +1,7 @@
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useState, useEffect } from "react";
 import { Dimensions, ScrollView, StyleSheet, Image } from "react-native";
 import styled from "styled-components/native";
-import { Layout, Text } from "@ui-kitten/components";
+import { Layout, Button, Card, Modal, Text } from "@ui-kitten/components";
 import { observer } from "mobx-react";
 import useStore from "../../stores";
 
@@ -42,8 +42,23 @@ const InnerStageTile = styled.TouchableOpacity`
 export const Level = observer(({ navigation, route }) => {
   const { stage } = useStore();
   const { level } = route.params;
-  const doPlay = useCallback((number) => {
-    navigation.push("Play", { level, number });
+  const [visible, setVisible] = useState(false);
+  const [modalItem, setModalItem] = useState({});
+  const doPlay = useCallback((item) => {
+    if (item.isClear) {
+      setVisible(true);
+      setModalItem({
+        level,
+        number: item.number,
+      });
+    } else {
+      navigation.push("Play", { level, number: item.number });
+    }
+  }, []);
+
+  const doReplay = useCallback(() => {
+    setVisible(false);
+    navigation.push("Play", modalItem);
   }, []);
 
   useEffect(() => {
@@ -58,7 +73,7 @@ export const Level = observer(({ navigation, route }) => {
           {stage.levels[level].map((item, index) => (
             <OuterStageTile key={index}>
               <InnerStageTile
-                onPress={() => doPlay(item.number)}
+                onPress={() => doPlay(item)}
                 style={{
                   backgroundColor: item.isClear ? "#5f61bb" : "#424392",
                 }}
@@ -78,12 +93,29 @@ export const Level = observer(({ navigation, route }) => {
             </OuterStageTile>
           ))}
         </Container>
+
+        <Modal
+          visible={visible}
+          backdropStyle={styles.backdrop}
+          onBackdropPress={() => setVisible(false)}
+        >
+          <Card disabled={true}>
+            <Text>You have already cleared it.</Text>
+            <Text style={{ marginBottom: 20 }}>
+              Would you like to try again?
+            </Text>
+            <Button onPress={() => doReplay()}>Go</Button>
+          </Card>
+        </Modal>
       </Layout>
     </ScrollView>
   );
 });
 
 const styles = StyleSheet.create({
+  backdrop: {
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
   layout: {
     flex: 1,
     flexDirection: "column",

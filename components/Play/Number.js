@@ -35,7 +35,7 @@ const Number = observer(({ numbers }) => {
   const [items, setItems] = useState(numbers);
 
   const countClick = useCallback((index, number) => {
-    let t = items.map((item, number) => {
+    let t = items.map((item) => {
       return {
         ...item,
         isNumberClick: false,

@@ -119,7 +119,10 @@ const game = observable({
       case "medium":
         d = isAnswerMedium(items);
         break;
-      case "hard" || "crazy":
+      case "hard":
+        d = isAnswerHardAndCrazy(items);
+        break;
+      case "crazy":
         d = isAnswerHardAndCrazy(items);
         break;
     }

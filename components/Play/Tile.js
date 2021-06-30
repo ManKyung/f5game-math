@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import styled from "styled-components/native";
-import { View, Text, StyleSheet, Dimensions } from "react-native";
+import { Text, StyleSheet, Dimensions } from "react-native";
 import { observer } from "mobx-react";
 import { isClear } from "../../lib";
 import useStore from "../../stores";
@@ -10,7 +10,6 @@ const screen = Dimensions.get("screen");
 const containerPadding = 4;
 const tilePadding = 1;
 
-// const tilePadding = 1;
 const OuterTile = styled.View`
   padding: 4px;
 `;
@@ -38,12 +37,6 @@ const Tile = observer(({ navigation, data, level, number }) => {
   const tileHeight =
     (screen.width - containerPadding * 2 - tilePadding * 2) / column;
 
-  // useEffect(() => {
-  //   setTimeout(() => {
-  //     setIsGameClearModal(true);
-  //     stage.setScore(level, number);
-  //   }, 2000);
-  // }, []);
   const doClick = useCallback((item, row, col) => {
     if (!game.selectedNumber || item.type !== "number") {
       return;
@@ -88,7 +81,7 @@ const Tile = observer(({ navigation, data, level, number }) => {
                 >
                   <Text
                     style={[
-                      styles.text,
+                      level === "crazy" ? styles.crazyText : styles.text,
                       item.isCorrect ? styles.isCorrect : null,
                     ]}
                   >
@@ -114,6 +107,11 @@ const styles = StyleSheet.create({
   text: {
     fontWeight: "bold",
     fontSize: 24,
+    color: "#fff",
+  },
+  crazyText: {
+    fontWeight: "bold",
+    fontSize: 16,
     color: "#fff",
   },
   isCorrect: {
