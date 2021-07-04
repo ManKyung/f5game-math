@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from "react";
 import styled from "styled-components/native";
-import { Dimensions, View } from "react-native";
+import { Text } from "@ui-kitten/components";
+import { Dimensions } from "react-native";
 import { observer } from "mobx-react";
 import useStore from "../../stores";
 
@@ -26,29 +27,48 @@ const NumberInnerTile = styled.TouchableOpacity`
 `;
 const NumberInnerTileText = styled.Text`
   color: #fff;
+  font-weight: bold;
   font-size: 24px;
-  text-decoration: none;
 `;
 
-const Number = observer(({ numbers }) => {
+const Number = observer(({ numbers, answerItems }) => {
   const { game } = useStore();
+  const [prevNumber, setPrevNumber] = useState(0);
   const [items, setItems] = useState(numbers);
 
-  const countClick = useCallback((index, number) => {
-    let t = items.map((item) => {
-      return {
-        ...item,
-        isNumberClick: false,
-      };
-    });
-    t[index].isNumberClick = !t[index].isNumberClick;
-    setItems([...t]);
-    game.setSelectedNumber(number);
-  }, []);
+  const countClick = useCallback(
+    (index, number) => {
+      let t = items.map((item) => {
+        return {
+          ...item,
+          isNumberClick: false,
+        };
+      });
+      if (game.currentRow !== null && game.currentCol !== null) {
+        setPrevNumber(number);
+        game.setSelectedNumber(number);
+        setTimeout(() => {
+          game.setSelectedNumber("");
+        }, 10);
+      } else {
+        if (number === prevNumber) {
+          setPrevNumber(0);
+          game.setSelectedNumber("");
+        } else {
+          t[index].isNumberClick = true;
+          setPrevNumber(number);
+          game.setSelectedNumber(number);
+        }
+      }
+
+      setItems(t);
+    },
+    [prevNumber]
+  );
   return (
     <>
       {items.map((item, index) => (
-        <NumberOuterTile key={index} style={{ marginTop: index < 5 ? 70 : 0 }}>
+        <NumberOuterTile key={index} style={{ marginTop: index < 5 ? 20 : 0 }}>
           <NumberInnerTile
             style={{
               backgroundColor: item.isNumberClick ? "#5f61bb" : "#424392",
@@ -61,6 +81,9 @@ const Number = observer(({ numbers }) => {
           </NumberInnerTile>
         </NumberOuterTile>
       ))}
+      {game.isAnswerVisible ? (
+        <Text style={{ fontSize: 24 }}>HINT: {answerItems.join(", ")}</Text>
+      ) : null}
     </>
   );
 });

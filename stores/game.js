@@ -107,8 +107,18 @@ const isAnswerHardAndCrazy = (items) => {
 
 const game = observable({
   selectedNumber: 0,
+  isAnswerVisible: false,
+  currentRow: null,
+  currentCol: null,
   setSelectedNumber(value) {
     this.selectedNumber = value;
+  },
+  setCurrentRowCol(row, col) {
+    this.currentRow = row;
+    this.currentCol = col;
+  },
+  setIsAnswerVisible(value) {
+    this.isAnswerVisible = value;
   },
   isAnswer(items, stage) {
     let d = null;

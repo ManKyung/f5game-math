@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components/native";
-import { Text, StyleSheet, Dimensions } from "react-native";
+import { Text, StyleSheet, Dimensions, Image } from "react-native";
 import { observer } from "mobx-react";
 import { isClear } from "../../lib";
 import useStore from "../../stores";
@@ -26,6 +26,20 @@ const InnerTile = styled.TouchableOpacity`
   border-radius: 8px;
 `;
 
+const getTileBackgroundColor = (item) => {
+  let color = "";
+  if (item.type === "answer") {
+    color = "transparent";
+  } else if (item.type === "number" && item.isStatus === true) {
+    color = "#BEBFF4";
+  } else if (item.active === true) {
+    color = "#424392";
+  } else if (item.active === false) {
+    color = "#5f61bb";
+  }
+  return color;
+};
+
 const Tile = observer(({ navigation, data, level, number }) => {
   const { game, stage } = useStore();
   const [items, setData] = useState(data);
@@ -37,23 +51,96 @@ const Tile = observer(({ navigation, data, level, number }) => {
   const tileHeight =
     (screen.width - containerPadding * 2 - tilePadding * 2) / column;
 
-  const doClick = useCallback((item, row, col) => {
-    if (!game.selectedNumber || item.type !== "number") {
+  useEffect(() => {
+    if (game.selectedNumber) {
+      let row = game.currentRow;
+      let col = game.currentCol;
+      if (row !== null && col !== null) {
+        let t = [...items];
+        let tt = null;
+        tt = { ...t[row][col] };
+        tt.value = game.selectedNumber === -1 ? "" : game.selectedNumber;
+        tt.isStatus = false;
+        t[row][col] = tt;
+        game.setCurrentRowCol(null, null);
+        const d = game.isAnswer(t, level);
+        setData(d);
+
+        if (isClear(d)) {
+          setTimeout(() => {
+            setIsGameClearModal(true);
+            game.setIsAnswerVisible(false);
+            stage.setScore(level, number);
+          }, 700);
+        }
+      }
+    }
+  }, [game.selectedNumber]);
+
+  const doClick = (item, row, col) => {
+    if (item.type !== "number") {
       return;
     }
     let t = [...items];
-    let tt = { ...t[row][col] };
-    tt.value = game.selectedNumber === -1 ? "" : game.selectedNumber;
-    t[row][col] = tt;
-    const d = game.isAnswer(t, level);
-    setData(d);
+    let tt = null;
+    t = t.map((row) => {
+      return row.map((col) => {
+        return {
+          ...col,
+          isStatus: false,
+        };
+      });
+    });
+    let d = [];
+    if (game.selectedNumber) {
+      let t = [...items];
+      let tt = null;
+      tt = { ...t[row][col] };
+      tt.value = game.selectedNumber === -1 ? "" : game.selectedNumber;
+      tt.isStatus = false;
+      t[row][col] = tt;
+
+      game.setCurrentRowCol(null, null);
+      d = game.isAnswer(t, level);
+      setData(d);
+    } else if (item.value === "") {
+      tt = { ...t[row][col] };
+      if (game.currentRow === row && game.currentCol === col) {
+        tt.isStatus = false;
+        game.setCurrentRowCol(null, null);
+      } else {
+        tt.isStatus = true;
+        game.setCurrentRowCol(row, col);
+      }
+      t[row][col] = tt;
+
+      d = game.isAnswer(t, level);
+      setData(d);
+    } else if (item.value) {
+      if (game.selectedNumber) {
+        let t = [...items];
+        let tt = null;
+        tt = { ...t[row][col] };
+        tt.value = game.selectedNumber === -1 ? "" : game.selectedNumber;
+        tt.isStatus = false;
+        t[row][col] = tt;
+
+        game.setCurrentRowCol(null, null);
+        d = game.isAnswer(t, level);
+        setData(d);
+      } else {
+        return;
+      }
+    }
+
     if (isClear(d)) {
       setTimeout(() => {
         setIsGameClearModal(true);
+        game.setIsAnswerVisible(false);
         stage.setScore(level, number);
       }, 700);
     }
-  }, []);
+  };
   return (
     <>
       {items.map((rows, row) => {
@@ -71,22 +158,39 @@ const Tile = observer(({ navigation, data, level, number }) => {
                 <InnerTile
                   onPress={() => doClick(item, row, col)}
                   style={{
-                    backgroundColor:
-                      item.type === "answer"
-                        ? "transparent"
-                        : item.active
-                        ? "#424392"
-                        : "#5f61bb",
+                    backgroundColor: getTileBackgroundColor(item),
                   }}
                 >
-                  <Text
-                    style={[
-                      level === "crazy" ? styles.crazyText : styles.text,
-                      item.isCorrect ? styles.isCorrect : null,
-                    ]}
-                  >
-                    {item.value}
-                  </Text>
+                  {item.type === "oper" && item.value === "+" ? (
+                    <Image
+                      source={require("../../assets/images/plus.png")}
+                      style={styles.operImage}
+                    />
+                  ) : null}
+                  {item.type === "oper" && item.value === "-" ? (
+                    <Image
+                      source={require("../../assets/images/minus.png")}
+                      style={styles.operImage}
+                    />
+                  ) : null}
+                  {item.type === "oper" && item.value === "*" ? (
+                    <Image
+                      source={require("../../assets/images/multiply.png")}
+                      style={styles.operImage}
+                    />
+                  ) : null}
+                  {item.type === "number" || item.type === "answer" ? (
+                    <Text
+                      style={[
+                        level === "crazy" && item.type === "answer"
+                          ? styles.crazyText
+                          : styles.text,
+                        item.isCorrect ? styles.isCorrect : null,
+                      ]}
+                    >
+                      {item.value}
+                    </Text>
+                  ) : null}
                 </InnerTile>
               </OuterTile>
             );
@@ -116,6 +220,10 @@ const styles = StyleSheet.create({
   },
   isCorrect: {
     color: "#2ecc71",
+  },
+  operImage: {
+    width: "40%",
+    height: "40%",
   },
 });
 

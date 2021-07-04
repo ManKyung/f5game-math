@@ -51,7 +51,7 @@ export default () => {
               options={{
                 headerShown: false,
               }}
-              initialParams={{ level: "easy" }}
+              initialParams={{ level: "easy", number: 1 }}
             />
           </Stack.Navigator>
         </NavigationContainer>

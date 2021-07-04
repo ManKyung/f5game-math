@@ -1,9 +1,18 @@
-import React from "react";
+import React, { useEffect } from "react";
 import styled from "styled-components/native";
-import { Layout } from "@ui-kitten/components";
-import { StyleSheet, View } from "react-native";
+import {
+  Layout,
+  Icon,
+  Text,
+  Button,
+  TopNavigation,
+  TopNavigationAction,
+} from "@ui-kitten/components";
+import { StyleSheet } from "react-native";
 import { StatusBar } from "expo-status-bar";
-import { setInitGame, Banner } from "../../lib";
+import { AdMobRewarded } from "expo-ads-admob";
+import { setInitGame, Banner, Rewared } from "../../lib";
+import useStore from "../../stores";
 import Tile from "./Tile";
 import Number from "./Number";
 
@@ -12,15 +21,56 @@ const Container = styled.View`
   flex-direction: row;
   justify-content: center;
   flex-wrap: wrap;
+  margin-top: 4px;
 `;
+
+const HintIcon = (props) => <Icon {...props} name="bulb-outline" />;
+
+const renderRightActions = () => (
+  <TopNavigationAction
+    icon={() => (
+      <Button
+        appearance="ghost"
+        status="warning"
+        accessoryRight={HintIcon}
+        onPress={async () => await Rewared()}
+      >
+        HINT
+      </Button>
+    )}
+  />
+);
 
 export const Play = ({ navigation, route }) => {
   const { level, number } = route.params;
+  const { game } = useStore();
+
   const maps = setInitGame(level);
+
+  useEffect(() => {
+    AdMobRewarded.addEventListener("rewardedVideoUserDidEarnReward", () => {
+      game.setIsAnswerVisible(true);
+    });
+    return () => {
+      game.setIsAnswerVisible(false);
+    };
+  }, []);
 
   return (
     <Layout style={styles.layout}>
       <StatusBar hidden />
+
+      <TopNavigation
+        title={() => {
+          return (
+            <Text category="h4">
+              {level.toUpperCase()} {number}
+            </Text>
+          );
+        }}
+        accessoryRight={renderRightActions}
+      />
+
       <Container>
         <Tile
           data={maps.map}
@@ -28,7 +78,7 @@ export const Play = ({ navigation, route }) => {
           navigation={navigation}
           number={number}
         />
-        <Number numbers={maps.count} />
+        <Number numbers={maps.count} answerItems={maps.answerItems} />
       </Container>
       <Banner />
     </Layout>
